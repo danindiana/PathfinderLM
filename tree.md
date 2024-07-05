@@ -1,4 +1,4 @@
-Sure! Here is the software stack setup for PathFinderLM refactored as a bash tree directory structure:
+Here is the software stack setup for PathFinderLM refactored as a bash tree directory structure:
 
 ```plaintext
 /
