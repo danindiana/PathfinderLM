@@ -1,3 +1,6 @@
+![00100--31](https://github.com/danindiana/PathfinderLM/assets/3030588/ef845116-ef1f-49ce-95b7-2fafc9022d94)
+
+
 Certainly! Here is a comprehensive software stack for PathFinderLM, designed as a personalized life coach system leveraging Language Models, Retrieval Augmented Generators (RAG), and running on Ubuntu 22.04 on a bare-metal server:
 
 ### 1. Hardware Setup
