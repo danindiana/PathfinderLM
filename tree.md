@@ -1,3 +1,42 @@
+```mermaid
+graph TD;
+    /["/"] --> home;
+    home["home/"] --> user;
+    user["user/"] --> pathfinderlm;
+    pathfinderlm["pathfinderlm/"] 
+        -->|Contains:| Dockerfile((Dockerfile))
+        -->|Contains:| docker-compose.yml((docker-compose.yml))
+        -->|Contains:| requirements.txt((requirements.txt))
+    pathfinderlm --> app[app/] 
+        --> main.py((main.py)) 
+        --> __init__.py((__init__.py))
+    app --> models[models/]
+        --> model.py((model.py))
+    app --> routes[routes/]
+        --> ask.py((ask.py))
+    app --> utils[utils/] 
+        --> preprocessing.py((preprocessing.py))  
+    pathfinderlm --> data[data/]
+        --> raw[raw/]
+        --> processed[processed/]
+        --> datasets[datasets/]
+            --> train.csv((train.csv)) 
+            --> test.csv((test.csv))
+    pathfinderlm --> logs[logs/]
+        --> training.log((training.log))
+    pathfinderlm --> results[results/]
+        --> model[model/]
+    pathfinderlm --> scripts[scripts/] 
+        --> train_model.py((train_model.py)) 
+        --> evaluate_model.py((evaluate_model.py)) 
+        --> fine_tune_model.py((fine_tune_model.py)) 
+    pathfinderlm --> docs[docs/] 
+        --> architecture.md((architecture.md))
+        --> setup_guide.md((setup_guide.md))
+        --> api_documentation.md((api_documentation.md))
+```
+
+
 Here is the software stack setup for PathFinderLM refactored as a bash tree directory structure:
 
 ```plaintext
