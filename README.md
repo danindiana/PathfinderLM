@@ -36,40 +36,40 @@ The system runs on Ubuntu 22.04 bare-metal servers for maximum control, performa
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
+    subgraph ClientLayer["Client Layer"]
         WebUI[Web Interface]
         MobileUI[Mobile App]
         API[REST API]
     end
 
-    subgraph "Application Layer"
+    subgraph ApplicationLayer["Application Layer"]
         Flask[Flask Application]
         Routes[Route Handlers]
         Auth[Authentication Module]
     end
 
-    subgraph "AI/ML Layer"
+    subgraph AIMLLayer["AI/ML Layer"]
         LM[Language Model<br/>GPT-4/BERT]
         RAG[RAG System]
         NLP[NLP Processing]
         Biometric[Biometric Auth]
     end
 
-    subgraph "Data Layer"
+    subgraph DataLayer["Data Layer"]
         VectorDB[(Vector Database<br/>FAISS/Pinecone)]
         KnowledgeBase[(Knowledge Base)]
         UserData[(User Data<br/>Encrypted)]
         Models[(Model Storage)]
     end
 
-    subgraph "Security Layer"
+    subgraph SecurityLayer["Security Layer"]
         Encryption[End-to-End Encryption]
         VoiceVerif[Voice Verification]
         Anomaly[Anomaly Detection]
         IAFramework[Information Assurance]
     end
 
-    subgraph "Infrastructure Layer"
+    subgraph InfrastructureLayer["Infrastructure Layer"]
         Docker[Docker Containers]
         Ubuntu[Ubuntu 22.04 LTS]
         GPU[NVIDIA GPU Support]
@@ -94,7 +94,7 @@ graph TB
     Encryption -.-> Flask
     VoiceVerif -.-> Auth
     Anomaly -.-> Routes
-    IAFramework -.-> Security Layer
+    IAFramework -.-> Encryption
 
     Flask --> Docker
     Docker --> Ubuntu
@@ -103,40 +103,40 @@ graph TB
 
     style LM fill:#4CAF50
     style RAG fill:#2196F3
-    style Security Layer fill:#FF9800
-    style Infrastructure Layer fill:#9E9E9E
+    style SecurityLayer fill:#FF9800
+    style InfrastructureLayer fill:#9E9E9E
 ```
 
 ### RAG Pipeline
 
 ```mermaid
 graph LR
-    subgraph "Input Processing"
+    subgraph InputProcessing["Input Processing"]
         UserQuery[User Query] --> Tokenize[Tokenization]
         Tokenize --> Embed[Query Embedding]
     end
 
-    subgraph "Retrieval Phase"
+    subgraph RetrievalPhase["Retrieval Phase"]
         Embed --> VectorSearch[Vector Similarity Search]
         VectorSearch --> FAISS[(FAISS Index)]
         FAISS --> TopK[Top-K Documents]
         KnowledgeBase[(Knowledge Base<br/>Articles, Advice, Research)] --> FAISS
     end
 
-    subgraph "Augmentation Phase"
+    subgraph AugmentationPhase["Augmentation Phase"]
         TopK --> ContextBuild[Context Building]
         UserQuery --> ContextBuild
         ContextBuild --> AugPrompt[Augmented Prompt]
     end
 
-    subgraph "Generation Phase"
+    subgraph GenerationPhase["Generation Phase"]
         AugPrompt --> LM[Language Model<br/>GPT-4/BERT]
         LM --> Response[Generated Response]
         Response --> PostProcess[Post-Processing]
         PostProcess --> Validation[Response Validation]
     end
 
-    subgraph "Feedback Loop"
+    subgraph FeedbackLoop["Feedback Loop"]
         Validation --> UserFeedback{User Feedback}
         UserFeedback -->|Positive| UpdateRewards[Update Model Rewards]
         UserFeedback -->|Negative| RefinementQueue[Refinement Queue]
@@ -145,10 +145,10 @@ graph LR
 
     Validation --> FinalResponse[Final Response to User]
 
-    style Retrieval Phase fill:#E3F2FD
-    style Generation Phase fill:#FFF3E0
-    style Augmentation Phase fill:#F3E5F5
-    style Feedback Loop fill:#E8F5E9
+    style RetrievalPhase fill:#E3F2FD
+    style GenerationPhase fill:#FFF3E0
+    style AugmentationPhase fill:#F3E5F5
+    style FeedbackLoop fill:#E8F5E9
 ```
 
 ### Data Flow
@@ -209,34 +209,34 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    subgraph "Authentication Layer"
+    subgraph AuthenticationLayer["Authentication Layer"]
         A1[Digital Signatures<br/>PKI]
         A2[Biometric Authentication<br/>Voice/Behavioral]
         A3[Challenge-Response<br/>OTP]
     end
 
-    subgraph "Encryption Layer"
+    subgraph EncryptionLayer["Encryption Layer"]
         E1[AES-256 Symmetric]
         E2[RSA Asymmetric]
         E3[Hash Functions<br/>SHA-256]
         E4[End-to-End Encryption]
     end
 
-    subgraph "Detection & Monitoring"
+    subgraph DetectionMonitoring["Detection and Monitoring"]
         D1[Anomaly Detection<br/>ML-based]
         D2[Voice Cloning Detection]
         D3[MITM Prevention]
         D4[Real-time Monitoring]
     end
 
-    subgraph "Information Assurance"
+    subgraph InformationAssurance["Information Assurance"]
         IA1[Entropy Measurement]
         IA2[Shannon's Theorem]
         IA3[Continuous Authentication]
         IA4[Audit Logging]
     end
 
-    subgraph "Compliance & Privacy"
+    subgraph CompliancePrivacy["Compliance and Privacy"]
         C1[GDPR Compliance]
         C2[HIPAA Standards]
         C3[Data Anonymization]
@@ -271,50 +271,50 @@ graph TD
     C3 --> SecureSystem
     C4 --> SecureSystem
 
-    style Authentication Layer fill:#4CAF50
-    style Encryption Layer fill:#2196F3
-    style Detection & Monitoring fill:#FF9800
-    style Information Assurance fill:#9C27B0
-    style Compliance & Privacy fill:#F44336
+    style AuthenticationLayer fill:#4CAF50
+    style EncryptionLayer fill:#2196F3
+    style DetectionMonitoring fill:#FF9800
+    style InformationAssurance fill:#9C27B0
+    style CompliancePrivacy fill:#F44336
 ```
 
 ### Deployment Architecture
 
 ```mermaid
 graph TB
-    subgraph "Ubuntu 22.04 Bare-Metal Server"
-        subgraph "Docker Environment"
-            subgraph "Application Container"
+    subgraph UbuntuServer["Ubuntu 22.04 Bare-Metal Server"]
+        subgraph DockerEnv["Docker Environment"]
+            subgraph AppContainer["Application Container"]
                 Flask[Flask App<br/>Port 5000]
                 Routes[Route Handlers]
                 Models[Model Loaders]
             end
 
-            subgraph "Database Container"
+            subgraph DBContainer["Database Container"]
                 VectorDB[(FAISS<br/>Vector Store)]
                 UserDB[(User Data<br/>PostgreSQL)]
             end
 
-            subgraph "AI/ML Container"
+            subgraph AIMLContainer["AI/ML Container"]
                 GPU[GPU Support<br/>CUDA]
                 PyTorch[PyTorch Runtime]
                 Transformers[HuggingFace<br/>Transformers]
             end
 
-            subgraph "Monitoring Container"
+            subgraph MonitorContainer["Monitoring Container"]
                 Prometheus[Prometheus<br/>Metrics]
                 Grafana[Grafana<br/>Dashboards]
             end
         end
 
-        subgraph "System Layer"
+        subgraph SystemLayer["System Layer"]
             Docker[Docker Engine]
             Nginx[Nginx Reverse Proxy]
             Firewall[UFW Firewall]
             SSH[SSH Server]
         end
 
-        subgraph "Hardware"
+        subgraph Hardware["Hardware"]
             CPU[AMD Ryzen 9 5950X<br/>16-Core]
             GPUHard[NVIDIA RTX 3060]
             RAM[128GB RAM]
@@ -344,10 +344,10 @@ graph TB
     Admin[System Admin] --> SSH
     SSH --> Docker
 
-    style Application Container fill:#4CAF50
-    style Database Container fill:#2196F3
-    style AI/ML Container fill:#FF9800
-    style Monitoring Container fill:#9C27B0
+    style AppContainer fill:#4CAF50
+    style DBContainer fill:#2196F3
+    style AIMLContainer fill:#FF9800
+    style MonitorContainer fill:#9C27B0
     style Hardware fill:#607D8B
 ```
 
