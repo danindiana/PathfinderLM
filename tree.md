@@ -1,39 +1,52 @@
 ```mermaid
-graph TD;
-    /["/"] --> home;
-    home["home/"] --> user;
-    user["user/"] --> pathfinderlm;
-    pathfinderlm["pathfinderlm/"] 
-        -->|Contains:| Dockerfile((Dockerfile))
-        -->|Contains:| docker-compose.yml((docker-compose.yml))
-        -->|Contains:| requirements.txt((requirements.txt))
-    pathfinderlm --> app[app/] 
-        --> main.py((main.py)) 
-        --> __init__.py((__init__.py))
-    app --> models[models/]
-        --> model.py((model.py))
-    app --> routes[routes/]
-        --> ask.py((ask.py))
-    app --> utils[utils/] 
-        --> preprocessing.py((preprocessing.py))  
-    pathfinderlm --> data[data/]
-        --> raw[raw/]
-        --> processed[processed/]
-        --> datasets[datasets/]
-            --> train.csv((train.csv)) 
-            --> test.csv((test.csv))
-    pathfinderlm --> logs[logs/]
-        --> training.log((training.log))
-    pathfinderlm --> results[results/]
-        --> model[model/]
-    pathfinderlm --> scripts[scripts/] 
-        --> train_model.py((train_model.py)) 
-        --> evaluate_model.py((evaluate_model.py)) 
-        --> fine_tune_model.py((fine_tune_model.py)) 
-    pathfinderlm --> docs[docs/] 
-        --> architecture.md((architecture.md))
-        --> setup_guide.md((setup_guide.md))
-        --> api_documentation.md((api_documentation.md))
+graph TD
+    Root["/"] --> Home["home/"]
+    Home --> User["user/"]
+    User --> PathfinderLM["pathfinderlm/"]
+
+    PathfinderLM --> Dockerfile["Dockerfile"]
+    PathfinderLM --> DockerCompose["docker-compose.yml"]
+    PathfinderLM --> Requirements["requirements.txt"]
+
+    PathfinderLM --> App["app/"]
+    App --> MainPy["main.py"]
+    App --> InitPy["__init__.py"]
+    App --> Models["models/"]
+    App --> Routes["routes/"]
+    App --> Utils["utils/"]
+
+    Models --> ModelPy["model.py"]
+    Routes --> AskPy["ask.py"]
+    Utils --> PreprocessingPy["preprocessing.py"]
+
+    PathfinderLM --> Data["data/"]
+    Data --> Raw["raw/"]
+    Data --> Processed["processed/"]
+    Data --> Datasets["datasets/"]
+    Datasets --> TrainCSV["train.csv"]
+    Datasets --> TestCSV["test.csv"]
+
+    PathfinderLM --> Logs["logs/"]
+    Logs --> TrainingLog["training.log"]
+
+    PathfinderLM --> Results["results/"]
+    Results --> ModelDir["model/"]
+
+    PathfinderLM --> Scripts["scripts/"]
+    Scripts --> TrainModelPy["train_model.py"]
+    Scripts --> EvaluateModelPy["evaluate_model.py"]
+    Scripts --> FineTuneModelPy["fine_tune_model.py"]
+
+    PathfinderLM --> Docs["docs/"]
+    Docs --> ArchitectureMD["architecture.md"]
+    Docs --> SetupGuideMD["setup_guide.md"]
+    Docs --> APIDocMD["api_documentation.md"]
+
+    style PathfinderLM fill:#2196F3,color:#fff
+    style App fill:#4CAF50,color:#fff
+    style Data fill:#FF9800,color:#fff
+    style Scripts fill:#9C27B0,color:#fff
+    style Docs fill:#00BCD4,color:#fff
 ```
 
 
