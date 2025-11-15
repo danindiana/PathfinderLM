@@ -94,7 +94,7 @@ graph TB
     Encryption -.-> Flask
     VoiceVerif -.-> Auth
     Anomaly -.-> Routes
-    IAFramework -.-> Security Layer
+    IAFramework -.-> Encryption
 
     Flask --> Docker
     Docker --> Ubuntu
@@ -103,8 +103,8 @@ graph TB
 
     style LM fill:#4CAF50
     style RAG fill:#2196F3
-    style Security Layer fill:#FF9800
-    style Infrastructure Layer fill:#9E9E9E
+    style Encryption fill:#FF9800
+    style Docker fill:#9E9E9E
 ```
 
 ### RAG Pipeline
@@ -209,34 +209,34 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    subgraph "Authentication Layer"
+    subgraph AuthenticationLayer["Authentication Layer"]
         A1[Digital Signatures<br/>PKI]
         A2[Biometric Authentication<br/>Voice/Behavioral]
         A3[Challenge-Response<br/>OTP]
     end
 
-    subgraph "Encryption Layer"
+    subgraph EncryptionLayer["Encryption Layer"]
         E1[AES-256 Symmetric]
         E2[RSA Asymmetric]
         E3[Hash Functions<br/>SHA-256]
         E4[End-to-End Encryption]
     end
 
-    subgraph "Detection & Monitoring"
+    subgraph DetectionMonitoring["Detection and Monitoring"]
         D1[Anomaly Detection<br/>ML-based]
         D2[Voice Cloning Detection]
         D3[MITM Prevention]
         D4[Real-time Monitoring]
     end
 
-    subgraph "Information Assurance"
+    subgraph InformationAssurance["Information Assurance"]
         IA1[Entropy Measurement]
         IA2[Shannon's Theorem]
         IA3[Continuous Authentication]
         IA4[Audit Logging]
     end
 
-    subgraph "Compliance & Privacy"
+    subgraph CompliancePrivacy["Compliance and Privacy"]
         C1[GDPR Compliance]
         C2[HIPAA Standards]
         C3[Data Anonymization]
@@ -271,11 +271,11 @@ graph TD
     C3 --> SecureSystem
     C4 --> SecureSystem
 
-    style Authentication Layer fill:#4CAF50
-    style Encryption Layer fill:#2196F3
-    style Detection & Monitoring fill:#FF9800
-    style Information Assurance fill:#9C27B0
-    style Compliance & Privacy fill:#F44336
+    style AuthenticationLayer fill:#4CAF50
+    style EncryptionLayer fill:#2196F3
+    style DetectionMonitoring fill:#FF9800
+    style InformationAssurance fill:#9C27B0
+    style CompliancePrivacy fill:#F44336
 ```
 
 ### Deployment Architecture
