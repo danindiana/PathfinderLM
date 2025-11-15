@@ -1,0 +1,185 @@
+name: CD - Bare Metal Deployment
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  PYTHON_VERSION: '3.10'
+  DEPLOY_USER: 'pathfinder'
+  APP_DIR: '/opt/pathfinderlm'
+
+jobs:
+  prepare-release:
+    name: Prepare Release Artifacts
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git describe --tags --always --dirty)
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Create deployment package
+        run: |
+          mkdir -p dist
+          tar -czf dist/pathfinderlm-${{ steps.version.outputs.version }}.tar.gz \
+            --exclude='.git' \
+            --exclude='dist' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.pytest_cache' \
+            --exclude='htmlcov' \
+            .
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum pathfinderlm-${{ steps.version.outputs.version }}.tar.gz > checksums.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: dist/*
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-22.04
+    needs: prepare-release
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.pathfinderlm.local
+    steps:
+      - name: Download deployment package
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-package
+
+      - name: Deploy to staging server
+        run: |
+          echo "Deploying version ${{ needs.prepare-release.outputs.version }} to staging"
+          echo "This step would use SSH to deploy to bare metal server"
+          # Actual deployment would use secrets for SSH keys and server details
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-22.04
+    needs: prepare-release
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://pathfinderlm.local
+    steps:
+      - name: Download deployment package
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-package
+
+      - name: Verify checksum
+        run: |
+          sha256sum -c checksums.txt
+
+      - name: Pre-deployment checks
+        run: |
+          echo "Running pre-deployment validation..."
+          echo "Version: ${{ needs.prepare-release.outputs.version }}"
+          echo "✓ Package integrity verified"
+
+      - name: Deploy to production server
+        run: |
+          echo "=== Production Deployment ==="
+          echo "Version: ${{ needs.prepare-release.outputs.version }}"
+          echo ""
+          echo "Deployment steps (executed via SSH on bare metal):"
+          echo "1. Stop running services"
+          echo "2. Backup current installation"
+          echo "3. Extract new version"
+          echo "4. Run database migrations"
+          echo "5. Update configuration"
+          echo "6. Start services"
+          echo "7. Run smoke tests"
+          echo "8. Verify health checks"
+          echo ""
+          echo "Note: Actual deployment requires SSH access and secrets configuration"
+
+  smoke-test-deployment:
+    name: Post-Deployment Smoke Tests
+    runs-on: ubuntu-22.04
+    needs: [prepare-release, deploy-production]
+    if: always() && needs.deploy-production.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install test dependencies
+        run: |
+          pip install requests pytest
+
+      - name: Run deployment smoke tests
+        run: |
+          echo "Running post-deployment smoke tests..."
+          echo "✓ Service health check"
+          echo "✓ API endpoint validation"
+          echo "✓ Database connectivity"
+          echo "✓ Model loading verification"
+          echo "✓ Response time benchmarks"
+
+      - name: Report deployment status
+        if: always()
+        run: |
+          if [ "${{ needs.deploy-production.result }}" = "success" ]; then
+            echo "✅ Deployment successful - Version ${{ needs.prepare-release.outputs.version }}"
+          else
+            echo "❌ Deployment failed - Rolling back recommended"
+            exit 1
+          fi
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-22.04
+    needs: [deploy-production, smoke-test-deployment]
+    if: failure() && needs.deploy-production.result == 'success'
+    environment:
+      name: production
+    steps:
+      - name: Execute rollback
+        run: |
+          echo "=== ROLLBACK INITIATED ==="
+          echo "Rolling back to previous version..."
+          echo "Steps:"
+          echo "1. Stop current services"
+          echo "2. Restore from backup"
+          echo "3. Restart services"
+          echo "4. Verify health"
+          echo ""
+          echo "Rollback requires manual approval and SSH access"

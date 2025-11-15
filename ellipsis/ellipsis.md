@@ -14,10 +14,19 @@ graph TD
     F --> J[Behavioral Analysis]
     J --> K[Pattern Recognition]
     J --> I
-    subgraph Security and Compliance
+
+    subgraph SecurityCompliance["Security and Compliance"]
         L[Encryption]
         M[Access Control]
         N[Audit Trails]
     end
-    F --> Security[Security and Compliance]
+
+    F --> L
+    F --> M
+    F --> N
+
+    style SecurityCompliance fill:#FF9800,color:#fff
+    style D fill:#F44336,color:#fff
+    style E fill:#4CAF50,color:#fff
+    style F fill:#2196F3,color:#fff
 ```
