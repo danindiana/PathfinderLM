@@ -1,4 +1,4 @@
-.PHONY: help install install-dev clean test lint format security docker-build docker-run deploy smoke-test all
+.PHONY: help install install-dev clean test lint format security docker-build docker-run deploy smoke-test diagrams all
 
 # Configuration
 PYTHON := python3
@@ -48,6 +48,7 @@ help:
 	@echo "  $(YELLOW)smoke-test$(NC)       - Run smoke tests"
 	@echo "  $(YELLOW)deploy-staging$(NC)   - Deploy to staging environment"
 	@echo "  $(YELLOW)deploy-production$(NC) - Deploy to production environment"
+	@echo "  $(YELLOW)diagrams$(NC)         - Render Graphviz diagrams to PNG + SVG"
 	@echo "  $(YELLOW)all$(NC)              - Run install, lint, test, and build"
 	@echo ""
 
@@ -68,6 +69,12 @@ install-dev: install
 	$(PIP) install bandit safety
 	$(PIP) install sphinx sphinx-rtd-theme
 	@echo "$(GREEN)✓ Development dependencies installed$(NC)"
+
+diagrams:
+	@echo "$(BLUE)Rendering Graphviz diagrams (PNG + SVG)...$(NC)"
+	@command -v dot >/dev/null || { echo "$(RED)error: graphviz 'dot' not found (sudo apt install graphviz)$(NC)"; exit 1; }
+	@cd diagrams && ./render.sh
+	@echo "$(GREEN)✓ Diagrams rendered$(NC)"
 
 clean:
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"

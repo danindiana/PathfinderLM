@@ -1,0 +1,70 @@
+// PathfinderLM — System Architecture
+// Render: dot -Tpng system_architecture.dot -o system_architecture.png
+//         dot -Tsvg system_architecture.dot -o system_architecture.svg
+digraph SystemArchitecture {
+    rankdir=TB;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — System Architecture";
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_client {
+        label="Client Layer"; style="filled"; color="#ECEFF1";
+        WebUI   [label="Web Interface"];
+        MobileUI[label="Mobile App"];
+        API     [label="REST API"];
+    }
+
+    subgraph cluster_app {
+        label="Application Layer"; style="filled"; color="#E8F5E9";
+        Flask  [label="Flask Application"];
+        Routes [label="Route Handlers"];
+        Auth   [label="Authentication Module"];
+    }
+
+    subgraph cluster_aiml {
+        label="AI/ML Layer"; style="filled"; color="#FFF3E0";
+        LM       [label="Language Model\nGPT-4 / BERT", fillcolor="#4CAF50", fontcolor="white"];
+        RAG      [label="RAG System", fillcolor="#2196F3", fontcolor="white"];
+        NLP      [label="NLP Processing"];
+        Biometric[label="Biometric Auth"];
+    }
+
+    subgraph cluster_data {
+        label="Data Layer"; style="filled"; color="#E3F2FD";
+        VectorDB     [label="Vector Database\nFAISS / Pinecone", shape=cylinder];
+        KnowledgeBase[label="Knowledge Base", shape=cylinder];
+        UserData     [label="User Data (Encrypted)", shape=cylinder];
+        Models       [label="Model Storage", shape=cylinder];
+    }
+
+    subgraph cluster_sec {
+        label="Security Layer"; style="filled"; color="#FFE0B2";
+        Encryption[label="End-to-End Encryption"];
+        VoiceVerif[label="Voice Verification"];
+        Anomaly   [label="Anomaly Detection"];
+        IAFramework[label="Information Assurance"];
+    }
+
+    subgraph cluster_infra {
+        label="Infrastructure Layer"; style="filled"; color="#ECEFF1";
+        Docker [label="Docker Containers"];
+        Ubuntu [label="Ubuntu 22.04 LTS"];
+        GPU    [label="NVIDIA GPU Support"];
+        Monitor[label="Prometheus / Grafana"];
+    }
+
+    WebUI -> Flask; MobileUI -> Flask; API -> Flask;
+    Flask -> Routes; Routes -> Auth; Routes -> LM;
+    LM -> RAG; RAG -> VectorDB; RAG -> KnowledgeBase;
+    NLP -> LM; Auth -> Biometric; Auth -> VoiceVerif;
+    Flask -> UserData; LM -> Models;
+
+    Encryption -> Flask [style=dashed];
+    VoiceVerif -> Auth  [style=dashed];
+    Anomaly -> Routes   [style=dashed];
+    IAFramework -> Encryption [style=dashed];
+
+    Flask -> Docker; Docker -> Ubuntu; Ubuntu -> GPU; Ubuntu -> Monitor;
+}

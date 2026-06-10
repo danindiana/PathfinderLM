@@ -1,0 +1,57 @@
+// PathfinderLM — Security Architecture
+// Render: dot -Tpng security_architecture.dot -o security_architecture.png
+//         dot -Tsvg security_architecture.dot -o security_architecture.svg
+digraph SecurityArchitecture {
+    rankdir=TB;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — Security Architecture";
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica"];
+
+    User[label="User Communication", shape=ellipse, fillcolor="#CFD8DC"];
+
+    subgraph cluster_auth {
+        label="Authentication Layer"; style="filled"; color="#E8F5E9";
+        A1[label="Digital Signatures (PKI)"];
+        A2[label="Biometric Auth\nVoice / Behavioral"];
+        A3[label="Challenge-Response (OTP)"];
+    }
+    subgraph cluster_enc {
+        label="Encryption Layer"; style="filled"; color="#E3F2FD";
+        E1[label="AES-256 Symmetric"];
+        E2[label="RSA Asymmetric"];
+        E3[label="Hash Functions (SHA-256)"];
+        E4[label="End-to-End Encryption"];
+    }
+    subgraph cluster_det {
+        label="Detection & Monitoring"; style="filled"; color="#FFF3E0";
+        D1[label="Anomaly Detection (ML)"];
+        D2[label="Voice Cloning Detection"];
+        D3[label="MITM Prevention"];
+        D4[label="Real-time Monitoring"];
+    }
+    subgraph cluster_ia {
+        label="Information Assurance"; style="filled"; color="#F3E5F5";
+        IA1[label="Entropy Measurement"];
+        IA2[label="Shannon's Theorem"];
+        IA3[label="Continuous Authentication"];
+        IA4[label="Audit Logging"];
+    }
+    subgraph cluster_comp {
+        label="Compliance & Privacy"; style="filled"; color="#FFEBEE";
+        C1[label="GDPR Compliance"];
+        C2[label="HIPAA Standards"];
+        C3[label="Data Anonymization"];
+        C4[label="Access Control"];
+    }
+
+    SecureSystem[label="Secure PathfinderLM System", fillcolor="#4CAF50", fontcolor="white"];
+
+    User -> A1; User -> A2; User -> A3;
+    A1 -> E1; A2 -> E1; A3 -> E1;
+    E1 -> D1; E2 -> D1; E3 -> D1; E4 -> D1;
+    D1 -> IA1; D2 -> IA2; D3 -> IA3; D4 -> IA4;
+    IA1 -> C1; IA2 -> C2; IA3 -> C3; IA4 -> C4;
+    C1 -> SecureSystem; C2 -> SecureSystem; C3 -> SecureSystem; C4 -> SecureSystem;
+}
