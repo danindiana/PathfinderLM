@@ -147,6 +147,9 @@ jobs:
           test -f Dockerfile || { echo "Dockerfile is missing from the repo"; exit 1; }
           echo "Building the committed Dockerfile (local-first app image)."
 
+      - name: Set lowercase image name
+        run: echo "IMAGE_NAME=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
