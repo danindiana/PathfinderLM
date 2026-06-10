@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+import time
 
 from flask import Blueprint, jsonify, request
 
-from app import llm
+from app import activity, llm
 from app.config import get_config
 from app.rag import Retriever
 from app.utils.postprocessing import format_answer
@@ -39,13 +40,15 @@ def _build_prompt(question: str, user_context: str, retrieved: list) -> str:
 @ask_bp.route("/ask", methods=["POST"])
 def ask():
     """Answer a coaching question, grounded in retrieved knowledge."""
+    started = time.perf_counter()
     data = request.get_json(silent=True) or {}
     question = (data.get("question") or "").strip()
+    config = get_config()
     if not question:
+        activity.record("", 400, 0.0, 0, config.model_name, error="missing question")
         return jsonify({"error": "Field 'question' is required."}), 400
 
     user_context = (data.get("context") or "").strip()
-    config = get_config()
 
     try:
         retrieved = _retriever.retrieve(question)
@@ -55,12 +58,18 @@ def ask():
 
     prompt = _build_prompt(question, user_context, retrieved)
 
+    def _elapsed() -> float:
+        return (time.perf_counter() - started) * 1000
+
     try:
         answer = llm.generate(prompt, system=config.system_prompt)
     except NotImplementedError as exc:
+        activity.record(question, 501, _elapsed(), len(retrieved), config.model_name, error=str(exc))
         return jsonify({"error": str(exc)}), 501
     except Exception as exc:
         logger.error("generation failed: %s", exc)
+        activity.record(question, 502, _elapsed(), len(retrieved), config.model_name, error=str(exc))
         return jsonify({"error": "Language model backend unavailable."}), 502
 
+    activity.record(question, 200, _elapsed(), len(retrieved), config.model_name)
     return jsonify(format_answer(answer, sources=retrieved, model=config.model_name))
