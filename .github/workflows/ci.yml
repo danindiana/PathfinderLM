@@ -220,9 +220,9 @@ jobs:
           def test_basic_imports():
               """Test if critical imports work"""
               try:
-                  import transformers
-                  import torch
                   import flask
+                  import ollama
+                  import faiss
                   assert True
               except ImportError as e:
                   pytest.skip(f"Import test skipped: {e}")

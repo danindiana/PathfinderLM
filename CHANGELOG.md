@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Implemented the application code stack** (previously docs-only). New `app/`
+  Flask package with an application factory, `POST /ask` (full RAG: Ollama
+  embeddings → FAISS Top-K retrieval → context-augmented generation), `GET
+  /health` (degraded-aware), `GET /metrics` (Prometheus), and a JSON API index.
+- Ollama provider layer (`app/llm.py`) with a clearly-stubbed OpenAI fallback;
+  shared client helper (`app/models/model.py`); FAISS retriever (`app/rag.py`)
+  that degrades gracefully when no index exists; pre/post-processing utils
+  (chunking, `<think>`-block stripping, answer formatting).
+- `scripts/build_index.py` (knowledge base → FAISS index + doc sidecar) and
+  `scripts/preprocess_data.py`.
+- `configs/config.yaml` + `configs/logging.conf`.
+- Offline-mocked `pytest` suite (`tests/`, 14 tests) that runs with no Ollama
+  server, plus `pyproject.toml`, `setup.cfg`, and `.dockerignore`.
+- Reconciled the smoke-test / CI import checks to the slimmed deps (flask,
+  ollama, faiss).
+
 ### Changed
 - **Repositioned to a local-first model stack.** Generation and embeddings now
   run on the [Ollama](https://ollama.com/) **0.22.1** runtime (default model

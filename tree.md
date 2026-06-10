@@ -33,9 +33,9 @@ graph TD
     Results --> ModelDir["model/"]
 
     PathfinderLM --> Scripts["scripts/"]
-    Scripts --> TrainModelPy["train_model.py"]
-    Scripts --> EvaluateModelPy["evaluate_model.py"]
-    Scripts --> FineTuneModelPy["fine_tune_model.py"]
+    Scripts --> BuildIndexPy["build_index.py"]
+    Scripts --> PreprocessDataPy["preprocess_data.py"]
+    Scripts --> SmokeTestSh["smoke_test.sh"]
 
     PathfinderLM --> Docs["docs/"]
     Docs --> ArchitectureMD["architecture.md"]
@@ -82,9 +82,10 @@ Here is the software stack setup for PathFinderLM refactored as a bash tree dire
 │           ├── results/
 │           │   ├── model/
 │           ├── scripts/
-│           │   ├── train_model.py
-│           │   ├── evaluate_model.py
-│           │   ├── fine_tune_model.py
+│           │   ├── build_index.py        # embed knowledge base -> FAISS
+│           │   ├── preprocess_data.py     # clean raw docs -> data/processed
+│           │   ├── smoke_test.sh
+│           │   └── deploy.sh
 │           └── docs/
 │               ├── architecture.md
 │               ├── setup_guide.md
@@ -229,11 +230,11 @@ Sure! Here's a more detailed and complete directory structure for the PathFinder
 │           │       ├── pytorch_model.bin
 │           │       ├── tokenizer.json
 │           ├── scripts/
-│           │   ├── train_model.py
-│           │   ├── evaluate_model.py
-│           │   ├── fine_tune_model.py
+│           │   ├── build_index.py
 │           │   ├── preprocess_data.py
-│           │   ├── postprocess_results.py
+│           │   ├── smoke_test.sh
+│           │   ├── deploy.sh
+│           │   └── setup_bare_metal.sh
 │           ├── docs/
 │           │   ├── architecture.md
 │           │   ├── setup_guide.md
