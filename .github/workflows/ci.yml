@@ -135,6 +135,9 @@ jobs:
     name: Docker Build & Scan
     runs-on: ubuntu-22.04
     needs: [lint, security-scan]
+    permissions:
+      contents: read
+      security-events: write   # required to upload Trivy SARIF to code scanning
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -170,6 +173,7 @@ jobs:
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
+        continue-on-error: true   # don't fail the build if code scanning is unavailable
         with:
           sarif_file: 'trivy-results.sarif'
 
