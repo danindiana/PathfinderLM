@@ -386,6 +386,10 @@ graph TB
     style Hardware fill:#607D8B
 ```
 
+> 📐 **Prefer static images?** Graphviz re-creations of every diagram below —
+> with PNG and SVG exports — live in [`diagrams/`](diagrams/). Regenerate them
+> with `make diagrams` or `diagrams/render.sh`.
+
 ### Directory Structure
 
 ```mermaid

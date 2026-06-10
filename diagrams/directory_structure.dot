@@ -1,0 +1,49 @@
+// PathfinderLM — Directory Structure
+// Render: dot -Tpng directory_structure.dot -o directory_structure.png
+//         dot -Tsvg directory_structure.dot -o directory_structure.svg
+digraph DirectoryStructure {
+    rankdir=LR;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — Directory Structure";
+    node [shape=folder, style="filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica", arrowhead=none];
+
+    Root[label="pathfinderlm/", fillcolor="#2196F3", fontcolor="white"];
+
+    Config[label="Configuration Files"];
+    Dockerfile[label="Dockerfile", shape=note];
+    DockerCompose[label="docker-compose.yml", shape=note];
+    Requirements[label="requirements.txt", shape=note];
+    GitIgnore[label=".gitignore", shape=note];
+
+    App[label="app/", fillcolor="#4CAF50", fontcolor="white"];
+    MainPy[label="main.py", shape=note];
+    Models[label="models/"]; ModelPy[label="model.py", shape=note];
+    Routes[label="routes/"]; AskPy[label="ask.py", shape=note];
+    Utils[label="utils/"]; Preprocess[label="preprocessing.py", shape=note]; Postprocess[label="postprocessing.py", shape=note];
+
+    Data[label="data/", fillcolor="#FF9800", fontcolor="white"];
+    Raw[label="raw/"]; Processed[label="processed/"]; Datasets[label="datasets/"];
+    TrainCSV[label="train.csv", shape=note]; TestCSV[label="test.csv", shape=note];
+
+    Scripts[label="scripts/", fillcolor="#9C27B0", fontcolor="white"];
+    Train[label="train_model.py", shape=note]; Evaluate[label="evaluate_model.py", shape=note];
+    FineTune[label="fine_tune_model.py", shape=note]; PreprocessScript[label="preprocess_data.py", shape=note];
+
+    Docs[label="docs/", fillcolor="#00BCD4", fontcolor="white"];
+    Tests[label="tests/", fillcolor="#E91E63", fontcolor="white"];
+    Logs[label="logs/"];
+    Results[label="results/"]; ModelDir[label="model/"];
+    Configs[label="configs/"];
+    Security[label="ellipsis/", fillcolor="#F44336", fontcolor="white"];
+
+    Root -> Config; Config -> {Dockerfile DockerCompose Requirements GitIgnore};
+    Root -> App; App -> {MainPy Models Routes Utils};
+    Models -> ModelPy; Routes -> AskPy; Utils -> {Preprocess Postprocess};
+    Root -> Data; Data -> {Raw Processed Datasets}; Datasets -> {TrainCSV TestCSV};
+    Root -> Scripts; Scripts -> {Train Evaluate FineTune PreprocessScript};
+    Root -> Docs; Root -> Tests; Root -> Logs;
+    Root -> Results; Results -> ModelDir;
+    Root -> Configs; Root -> Security;
+}
