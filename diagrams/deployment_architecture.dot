@@ -30,10 +30,10 @@ digraph DeploymentArchitecture {
                 UserDB  [label="User Data (PostgreSQL)", shape=cylinder];
             }
             subgraph cluster_aimlc {
-                label="AI/ML Container"; style="filled"; color="#FFF3E0";
+                label="Ollama Container (0.22.1)"; style="filled"; color="#FFF3E0";
                 GPU         [label="GPU Support (CUDA)"];
-                PyTorch     [label="PyTorch Runtime"];
-                Transformers[label="HuggingFace Transformers"];
+                OllamaRT    [label="Ollama Runtime\ndeepseek-r1:14b"];
+                OpenClaw    [label="OpenClaw\nAgent Layer"];
             }
             subgraph cluster_monc {
                 label="Monitoring Container"; style="filled"; color="#F3E5F5";
@@ -60,8 +60,8 @@ digraph DeploymentArchitecture {
     }
 
     Internet -> Firewall -> Nginx -> Flask;
-    Flask -> VectorDB; Flask -> UserDB; Flask -> PyTorch;
-    PyTorch -> GPU; Transformers -> GPU;
+    Flask -> VectorDB; Flask -> UserDB; Flask -> OllamaRT;
+    OllamaRT -> GPU; OpenClaw -> OllamaRT;
     Flask -> Prometheus -> Grafana;
     Docker -> CPU; Docker -> GPUHard; Docker -> RAM; Docker -> Storage;
     Admin -> SSH -> Docker;

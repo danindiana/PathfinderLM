@@ -1,0 +1,79 @@
+# PathfinderLM — local-first, dockerized stack
+#
+# Default model runtime is Ollama 0.22.1 running in its own container, with the
+# Flask app talking to it over the compose network. The OpenClaw agent layer
+# (https://openclaw.ai) runs on the host and can point at this same Ollama
+# endpoint (http://localhost:11434).
+#
+# First-run bootstrap (pull the models into the Ollama volume):
+#   docker compose up -d ollama
+#   docker compose exec ollama ollama pull deepseek-r1:14b
+#   docker compose exec ollama ollama pull nomic-embed-text
+#   docker compose up -d app
+#
+services:
+  ollama:
+    image: ollama/ollama:0.22.1
+    container_name: pathfinderlm-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    # GPU acceleration (requires the NVIDIA Container Toolkit on the host).
+    # Comment this block out for a CPU-only deployment.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  app:
+    build: .
+    container_name: pathfinderlm-app
+    depends_on:
+      ollama:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - LLM_PROVIDER=ollama            # ollama | openai
+      - MODEL_NAME=deepseek-r1:14b
+      - EMBEDDING_MODEL=nomic-embed-text
+      - FAISS_INDEX_PATH=results/faiss.index
+      - KNOWLEDGE_BASE_DIR=data/processed
+      - TOP_K=5
+      - LOG_LEVEL=INFO
+      # Optional cloud fallback — set LLM_PROVIDER=openai and provide a key:
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./results:/app/results
+    restart: unless-stopped
+
+  # --- Optional supporting services (uncomment as the app grows) ---
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     - POSTGRES_DB=pathfinderlm
+  #     - POSTGRES_USER=pathfinder
+  #     - POSTGRES_PASSWORD=change-me
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #
+  # redis:
+  #   image: redis:7-alpine
+
+volumes:
+  ollama_models:
+  # pg_data:

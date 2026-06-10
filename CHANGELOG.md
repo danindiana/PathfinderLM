@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Repositioned to a local-first model stack.** Generation and embeddings now
+  run on the [Ollama](https://ollama.com/) **0.22.1** runtime (default model
+  `deepseek-r1:14b`, embeddings via `nomic-embed-text`), orchestrated by the
+  [OpenClaw](https://openclaw.ai/) agent layer. OpenAI GPT-4 / HuggingFace
+  Transformers are demoted to an optional cloud fallback.
+- Updated README badges, Overview, Technology Stack, Configuration table,
+  Acknowledgments, and all architecture diagrams (Mermaid + Graphviz `.dot`
+  re-renders) to reflect the Ollama/OpenClaw stack.
+- Slimmed `requirements.txt` to the `ollama` client + `faiss-cpu`; `torch`/
+  `transformers`/`sentence-transformers` moved to a commented fallback block.
+- Refreshed `mission.md` and `ground_game.md` setup/code examples for Ollama
+  (Modelfile customization, Ollama Python client in the Flask example).
+
 ### Added
+- **Real Docker assets** (previously referenced but missing): `Dockerfile` for
+  the Flask app and `docker-compose.yml` with a GPU-enabled
+  `ollama/ollama:0.22.1` service, persistent model volume, and health checks.
 - Complete CI/CD pipeline with GitHub Actions
   - CI workflow (`.github/workflows/ci.yml`) for automated testing
   - CD workflow (`.github/workflows/cd.yml`) for deployment
