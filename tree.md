@@ -134,63 +134,55 @@ services:
 
 #### requirements.txt
 ```plaintext
-torch
-transformers
-sentence-transformers
+ollama
 faiss-cpu
 flask
+# optional cloud/HF fallback: torch transformers sentence-transformers openai
 ```
 
 #### app/main.py
 ```python
+import os
 from flask import Flask, request, jsonify
-from transformers import pipeline
+from ollama import Client
 
 app = Flask(__name__)
-model_name = "bert-base-uncased"
-qa_pipeline = pipeline("question-answering", model=model_name, tokenizer=model_name)
+client = Client(host=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+MODEL = os.getenv("MODEL_NAME", "deepseek-r1:14b")
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
     question = data.get("question")
-    context = data.get("context")
-    result = qa_pipeline(question=question, context=context)
-    return jsonify(result)
+    context = data.get("context", "")
+    prompt = f"Context:\n{context}\n\nQuestion: {question}"
+    result = client.generate(model=MODEL, prompt=prompt)
+    return jsonify({"answer": result["response"]})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=int(os.getenv("FLASK_PORT", 5000)))
 ```
 
-#### scripts/train_model.py
+#### scripts/build_index.py
 ```python
-from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification, AutoTokenizer
-import datasets
+# Build the FAISS index from the knowledge base using Ollama embeddings
+# (nomic-embed-text). Customizing the assistant is done via an Ollama Modelfile
+# (system prompt + parameters), not by fine-tuning weights.
+import os, faiss, numpy as np
+from ollama import Client
 
-model_name = "bert-base-uncased"
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+client = Client(host=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+EMBED_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 
-dataset = datasets.load_dataset('csv', data_files={'train': 'data/datasets/train.csv', 'test': 'data/datasets/test.csv'})
+def embed(text: str) -> np.ndarray:
+    resp = client.embeddings(model=EMBED_MODEL, prompt=text)
+    return np.array(resp["embedding"], dtype="float32")
 
-training_args = TrainingArguments(
-    output_dir='./results/model',
-    num_train_epochs=3,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    warmup_steps=500,
-    weight_decay=0.01,
-    logging_dir='./logs',
-)
-
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=dataset['train'],
-    eval_dataset=dataset['test']
-)
-
-trainer.train()
+def build(docs: list[str], index_path="results/faiss.index"):
+    vectors = np.vstack([embed(d) for d in docs])
+    index = faiss.IndexFlatL2(vectors.shape[1])
+    index.add(vectors)
+    faiss.write_index(index, index_path)
 ```
 
 This structure organizes the various components and scripts for PathFinderLM, ensuring clarity and maintainability of the project.
@@ -261,29 +253,33 @@ Sure! Here's a more detailed and complete directory structure for the PathFinder
 
 #### app/models/model.py
 ```python
-from transformers import AutoModelForSequenceClassification
+import os
+from ollama import Client
 
-def load_model(model_name="bert-base-uncased"):
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
-    return model
+def get_client():
+    return Client(host=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+
+DEFAULT_MODEL = os.getenv("MODEL_NAME", "deepseek-r1:14b")
 ```
 
 #### app/routes/ask.py
 ```python
+import os
 from flask import Blueprint, request, jsonify
-from transformers import pipeline
+from ollama import Client
 
 ask_bp = Blueprint('ask', __name__)
-model_name = "bert-base-uncased"
-qa_pipeline = pipeline("question-answering", model=model_name, tokenizer=model_name)
+client = Client(host=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+MODEL = os.getenv("MODEL_NAME", "deepseek-r1:14b")
 
 @ask_bp.route('/ask', methods=['POST'])
 def ask():
     data = request.json
     question = data.get("question")
-    context = data.get("context")
-    result = qa_pipeline(question=question, context=context)
-    return jsonify(result)
+    context = data.get("context", "")
+    prompt = f"Context:\n{context}\n\nQuestion: {question}"
+    result = client.generate(model=MODEL, prompt=prompt)
+    return jsonify({"answer": result["response"]})
 ```
 
 #### app/utils/postprocessing.py

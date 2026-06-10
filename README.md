@@ -15,7 +15,8 @@
 <!-- Language & runtime -->
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![HuggingFace Transformers](https://img.shields.io/badge/%F0%9F%A4%97%20Transformers-4.30%2B-FFD21E.svg)](https://huggingface.co/transformers/)
+[![Ollama](https://img.shields.io/badge/Ollama-0.22.1-000000.svg?logo=ollama&logoColor=white)](https://ollama.com/)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-local--first%20agent-6E40C9.svg)](https://openclaw.ai/)
 [![FAISS](https://img.shields.io/badge/FAISS-vector%20search-005571.svg)](https://github.com/facebookresearch/faiss)
 [![Flask](https://img.shields.io/badge/Flask-2.3%2B-000000.svg?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 
@@ -61,9 +62,9 @@
 
 ## Overview
 
-PathfinderLM is an AI-powered life coaching system designed to guide users towards their personal goals and aspirations. By combining cutting-edge language models (like GPT-4, BERT) with Retrieval Augmented Generation (RAG) technology, PathfinderLM delivers a personalized, informative, and empathetic coaching experience.
+PathfinderLM is an AI-powered life coaching system designed to guide users towards their personal goals and aspirations. It is **local-first**: language models run on your own hardware through the [Ollama](https://ollama.com/) 0.22.1 runtime (default model `deepseek-r1:14b`), orchestrated by the [OpenClaw](https://openclaw.ai/) agent layer, and combined with Retrieval Augmented Generation (RAG) to deliver a personalized, informative, and empathetic coaching experience. Cloud models (e.g. OpenAI GPT-4) remain available as an optional fallback.
 
-The system runs on Ubuntu 22.04 bare-metal servers for maximum control, performance, and data privacy, making it suitable for both personal development and specialized applications such as substance cessation support.
+The system runs on Ubuntu 22.04 bare-metal servers (or fully containerized via Docker) for maximum control, performance, and data privacy — making it suitable for both personal development and specialized applications such as substance cessation support.
 
 ## Architecture
 
@@ -84,14 +85,14 @@ graph TB
     end
 
     subgraph AIMLLayer["AI/ML Layer"]
-        LM[Language Model<br/>GPT-4/BERT]
+        LM[LLM Runtime<br/>Ollama 0.22.1<br/>deepseek-r1:14b]
         RAG[RAG System]
         NLP[NLP Processing]
         Biometric[Biometric Auth]
     end
 
     subgraph DataLayer["Data Layer"]
-        VectorDB[(Vector Database<br/>FAISS/Pinecone)]
+        VectorDB[(Vector Database<br/>FAISS)]
         KnowledgeBase[(Knowledge Base)]
         UserData[(User Data<br/>Encrypted)]
         Models[(Model Storage)]
@@ -165,7 +166,7 @@ graph LR
     end
 
     subgraph GenerationPhase["Generation Phase"]
-        AugPrompt --> LM[Language Model<br/>GPT-4/BERT]
+        AugPrompt --> LM[LLM Runtime<br/>Ollama 0.22.1<br/>deepseek-r1:14b]
         LM --> Response[Generated Response]
         Response --> PostProcess[Post-Processing]
         PostProcess --> Validation[Response Validation]
@@ -194,7 +195,7 @@ sequenceDiagram
     participant UI as User Interface
     participant Auth as Authentication
     participant App as Flask Application
-    participant LM as Language Model
+    participant LM as Ollama / OpenClaw
     participant RAG as RAG System
     participant DB as Vector Database
     participant KB as Knowledge Base
@@ -330,10 +331,10 @@ graph TB
                 UserDB[(User Data<br/>PostgreSQL)]
             end
 
-            subgraph AIMLContainer["AI/ML Container"]
+            subgraph AIMLContainer["Ollama Container (0.22.1)"]
                 GPU[GPU Support<br/>CUDA]
-                PyTorch[PyTorch Runtime]
-                Transformers[HuggingFace<br/>Transformers]
+                OllamaRT[Ollama Runtime<br/>deepseek-r1:14b]
+                OpenClaw[OpenClaw<br/>Agent Layer]
             end
 
             subgraph MonitorContainer["Monitoring Container"]
@@ -363,10 +364,10 @@ graph TB
 
     Flask --> VectorDB
     Flask --> UserDB
-    Flask --> PyTorch
+    Flask --> OllamaRT
 
-    PyTorch --> GPU
-    Transformers --> GPU
+    OllamaRT --> GPU
+    OpenClaw --> OllamaRT
 
     Flask --> Prometheus
     Prometheus --> Grafana
@@ -495,11 +496,14 @@ graph TD
 
 ## Technology Stack
 
-### AI/ML
-- **Language Models**: GPT-4, BERT, Transformers
-- **Frameworks**: PyTorch, TensorFlow, HuggingFace Transformers
-- **Vector Search**: FAISS, Sentence-Transformers
+### AI/ML (local-first)
+- **LLM Runtime**: [Ollama](https://ollama.com/) **0.22.1** (local, containerized)
+- **Default Model**: `deepseek-r1:14b`
+- **Agent Layer**: [OpenClaw](https://openclaw.ai/) — local-first, multi-model personal-AI assistant
+- **Embeddings**: Ollama (`nomic-embed-text`)
+- **Vector Search**: FAISS
 - **NLP**: spaCy, NLTK
+- **Optional cloud fallback**: OpenAI GPT-4 · HuggingFace Transformers / PyTorch
 
 ### Backend
 - **Framework**: Flask
@@ -547,16 +551,28 @@ graph TD
    # Edit .env with your configuration
    ```
 
-3. **Build and run with Docker**
+3. **Start the Ollama runtime and pull the models** (first run only)
    ```bash
-   docker-compose up --build
+   docker compose up -d ollama
+   docker compose exec ollama ollama pull deepseek-r1:14b
+   docker compose exec ollama ollama pull nomic-embed-text
    ```
 
-4. **Access the application**
+4. **Build and run the application**
+   ```bash
+   docker compose up --build app
    ```
-   Web UI: http://localhost:5000
-   API: http://localhost:5000/api
+
+5. **Access the application**
    ```
+   Web UI:     http://localhost:5000
+   API:        http://localhost:5000/api
+   Ollama API: http://localhost:11434
+   ```
+
+> The `ollama` service uses the `ollama/ollama:0.22.1` image with a persistent
+> `ollama_models` volume, so models are pulled only once. GPU acceleration
+> requires the NVIDIA Container Toolkit (see `docker-compose.yml`).
 
 ### Manual Setup (Without Docker)
 
@@ -586,8 +602,11 @@ cp .env.example .env
 |----------|---------|-------------|
 | `FLASK_ENV` | `production` | `development` enables debug + autoreload |
 | `FLASK_PORT` | `5000` | Port the Flask app binds to |
-| `MODEL_NAME` | `bert-base-uncased` | HuggingFace model id used for generation/embeddings |
-| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Encoder for the FAISS index |
+| `LLM_PROVIDER` | `ollama` | LLM backend: `ollama` (local) or `openai` (cloud fallback) |
+| `OLLAMA_HOST` | `http://ollama:11434` | Ollama runtime endpoint (`http://localhost:11434` outside Docker) |
+| `MODEL_NAME` | `deepseek-r1:14b` | Ollama model used for generation/reasoning |
+| `EMBEDDING_MODEL` | `nomic-embed-text` | Ollama embedding model for the FAISS index |
+| `OPENAI_API_KEY` | _(unset)_ | Required only when `LLM_PROVIDER=openai` |
 | `FAISS_INDEX_PATH` | `results/faiss.index` | On-disk location of the vector index |
 | `KNOWLEDGE_BASE_DIR` | `data/processed` | Source documents ingested into the index |
 | `TOP_K` | `5` | Number of documents retrieved per query |
@@ -775,8 +794,9 @@ For issues, questions, or contributions:
 
 ## Acknowledgments
 
-- Built with [HuggingFace Transformers](https://huggingface.co/transformers/)
-- Powered by [PyTorch](https://pytorch.org/)
+- Powered by [Ollama](https://ollama.com/) for local model serving
+- Agent layer by [OpenClaw](https://openclaw.ai/) — "the AI that actually does things"
+- Also supports [HuggingFace Transformers](https://huggingface.co/transformers/) / [PyTorch](https://pytorch.org/) for the optional cloud fallback path
 - Inspired by advances in RAG and LLM research
 
 ---

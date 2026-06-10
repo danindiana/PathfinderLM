@@ -44,70 +44,79 @@ Here is a comprehensive software stack for PathFinderLM, designed as a personali
   sudo apt install python3 python3-pip -y
   ```
 
-- **Install PyTorch and Transformers**:
+- **Install the app dependencies** (lightweight — generation runs on Ollama):
   ```bash
-  pip3 install torch transformers
+  pip3 install ollama faiss-cpu flask
   ```
 
-- **Additional Libraries**:
+### 4. Language Models (local-first via Ollama 0.22.1)
+The app talks to the [Ollama](https://ollama.com/) runtime over HTTP, so no
+`torch`/`transformers` are needed for the default path. The
+[OpenClaw](https://openclaw.ai/) agent layer can point at the same endpoint.
+
+- **Run the Ollama runtime** (containerized — see the compose file below) or
+  install it natively, then pull the models once:
   ```bash
-  pip3 install sentence-transformers faiss-cpu
+  ollama pull deepseek-r1:14b   # default generation/reasoning model
+  ollama pull nomic-embed-text  # embeddings for the FAISS index
   ```
 
-### 4. Language Models
-#### HuggingFace Transformers
-- **Install Transformers**:
-  ```bash
-  pip3 install transformers
-  ```
-
-#### Example: Dockerfile for Environment Setup
+#### Example: Dockerfile for the app
 ```Dockerfile
-# Base image
-FROM ubuntu:22.04
+FROM python:3.10-slim
 
-# Install dependencies
-RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy application files
-COPY . /app/
-WORKDIR /app/
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
-# Install Python dependencies
-RUN pip3 install -r requirements.txt
-
-# Expose the port
 EXPOSE 5000
-
-# Command to run the application
-CMD ["python3", "main.py"]
+ENV OLLAMA_HOST=http://ollama:11434 MODEL_NAME=deepseek-r1:14b
+CMD ["python3", "app/main.py"]
 ```
 
 #### Example: requirements.txt
 ```
-torch
-transformers
-sentence-transformers
+ollama
 faiss-cpu
 flask
+# optional cloud/HF fallback: torch transformers sentence-transformers openai
 ```
 
 ### 5. Development Environment Setup Using Docker
-#### docker-compose.yml
+#### docker-compose.yml (Ollama 0.22.1 + app)
 ```yaml
-version: '3.8'
-
 services:
+  ollama:
+    image: ollama/ollama:0.22.1
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
   app:
     build: .
     container_name: pathfinderlm_app
+    depends_on:
+      - ollama
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app
     environment:
-      - LANG=en_US.UTF-8
-      - LC_ALL=en_US.UTF-8
+      - OLLAMA_HOST=http://ollama:11434
+      - MODEL_NAME=deepseek-r1:14b
+
+volumes:
+  ollama_models:
 ```
 
 ### 6. Deployment
@@ -116,34 +125,20 @@ services:
   docker-compose up --build
   ```
 
-### 7. Training and Fine-Tuning
-- **Prepare Custom Dataset**: Collect and preprocess relevant data for personal development.
-- **Fine-Tune Models**:
-  ```python
-  from transformers import Trainer, TrainingArguments, AutoModelForSequenceClassification, AutoTokenizer
+### 7. Customizing the Model
+- **Prepare Custom Knowledge**: Collect and preprocess relevant documents for
+  personal development; embed them with `nomic-embed-text` into the FAISS index.
+- **Tailor behavior with an Ollama Modelfile** (system prompt, parameters) rather
+  than fine-tuning weights:
+  ```bash
+  cat > Modelfile <<'EOF'
+  FROM deepseek-r1:14b
+  PARAMETER temperature 0.6
+  SYSTEM "You are PathfinderLM, an empathetic, evidence-based life coach."
+  EOF
 
-  model_name = "bert-base-uncased"
-  model = AutoModelForSequenceClassification.from_pretrained(model_name)
-  tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-  training_args = TrainingArguments(
-      output_dir='./results',
-      num_train_epochs=3,
-      per_device_train_batch_size=8,
-      per_device_eval_batch_size=8,
-      warmup_steps=500,
-      weight_decay=0.01,
-      logging_dir='./logs',
-  )
-
-  trainer = Trainer(
-      model=model,
-      args=training_args,
-      train_dataset=train_dataset,
-      eval_dataset=eval_dataset
-  )
-
-  trainer.train()
+  ollama create pathfinder-coach -f Modelfile
+  # then set MODEL_NAME=pathfinder-coach
   ```
 
 ### 8. User Interface
@@ -155,23 +150,25 @@ services:
 
 #### Example: Flask Application (main.py)
 ```python
+import os
 from flask import Flask, request, jsonify
-from transformers import pipeline
+from ollama import Client
 
 app = Flask(__name__)
-model_name = "bert-base-uncased"
-qa_pipeline = pipeline("question-answering", model=model_name, tokenizer=model_name)
+client = Client(host=os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+MODEL = os.getenv("MODEL_NAME", "deepseek-r1:14b")
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
     question = data.get("question")
-    context = data.get("context")
-    result = qa_pipeline(question=question, context=context)
-    return jsonify(result)
+    context = data.get("context", "")
+    prompt = f"Context:\n{context}\n\nQuestion: {question}"
+    result = client.generate(model=MODEL, prompt=prompt)
+    return jsonify({"answer": result["response"]})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=int(os.getenv("FLASK_PORT", 5000)))
 ```
 
 ### 9. Testing and Validation

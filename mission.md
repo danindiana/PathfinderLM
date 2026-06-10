@@ -6,7 +6,7 @@
 
 **Core Concept:**
 
-PathfinderLM is an AI-powered life coaching system designed to guide users towards their personal goals and aspirations. It combines cutting-edge language models (like GPT-4) with Retrieval Augmented Generation (RAG) for a personalized, informative, and empathetic coaching experience. 
+PathfinderLM is an AI-powered life coaching system designed to guide users towards their personal goals and aspirations. It is local-first: language models run on your own hardware through the Ollama 0.22.1 runtime (default `deepseek-r1:14b`), orchestrated by the OpenClaw agent layer (https://openclaw.ai), and combined with Retrieval Augmented Generation (RAG) for a personalized, informative, and empathetic coaching experience. Cloud models (e.g. GPT-4) remain an optional fallback. 
 
 **Key Features:**
 
@@ -20,8 +20,8 @@ PathfinderLM is an AI-powered life coaching system designed to guide users towar
 **Technical Architecture:**
 
 1. **User Interface:** A user-friendly web or mobile app for interaction.
-2. **Language Model (LM):** The core of the system, responsible for natural language understanding, generation, and decision-making (e.g., GPT-4).
-3. **Retrieval Mechanism (RAG):**  Connects the LM to a knowledge base (potentially a vector database like Pinecone), enabling it to retrieve relevant information on demand.
+2. **Language Model (LM):** The core of the system, responsible for natural language understanding, generation, and decision-making — served locally by Ollama 0.22.1 (default `deepseek-r1:14b`) and driven by the OpenClaw agent layer. Cloud models (e.g. GPT-4) are an optional fallback.
+3. **Retrieval Mechanism (RAG):**  Connects the LM to a knowledge base backed by a FAISS vector index (embeddings via Ollama `nomic-embed-text`), enabling it to retrieve relevant information on demand.
 4. **Knowledge Base:**  A curated repository of information on various life coaching topics, potentially including research articles, self-help books, and expert advice.
 5. **Bare-Metal Server (Ubuntu 22.04):**  Hosts the entire system for maximum control and performance optimization.
 
@@ -104,17 +104,18 @@ For the server itself:
 ### 2. **Software Requirements and Setup**
 Ubuntu 22.04 comes with Python pre-installed, but we will also need tools like Docker to manage our applications effectively:
 - **Install Docker**: Use `apt` packages or the official Docker repository.
-- **Python dependencies** - You'll require TensorFlow, transformers, scikit-learn among others, so consider setting up a requirements.txt file and installing through Docker for easier package management.
+- **Ollama runtime** - Run `ollama/ollama:0.22.1` as a container (see `docker-compose.yml`) and pull the models once: `ollama pull deepseek-r1:14b` and `ollama pull nomic-embed-text`.
+- **Python dependencies** - The app needs only the lightweight `ollama` client plus `faiss-cpu` (see `requirements.txt`); generation and embeddings run on the Ollama service. `torch`/`transformers` are optional, for the cloud/HF fallback path only.
 
 ### 3. **Retrieval Augmented Generators (RAG)** Setup
 A Retrieval Augmented Generator essentially leverages language models that can perform tasks better if they are able to retrieve information from a separate repository. We could build this using:
 
-- **PyTorch or TensorFlow**: For model implementation.
-- **Embedding-based retrieval** like the `passage_retriever` library, which utilizes an index created by sentence embedding algorithms (like SentenceTransformer).
+- **Ollama runtime**: Serves the generation model over a local HTTP API (no PyTorch/TensorFlow needed in the app).
+- **Embedding-based retrieval**: A FAISS index built from Ollama `nomic-embed-text` embeddings.
 
 ### 4. **Language Models**
-Select a pre-trained model that aligns with your objectives:
-- **OpenAI's GPT models**, HuggingFace’s Transformers for both NLP tasks and retrieval.
+Select a local model that aligns with your objectives:
+- **Ollama** models — default `deepseek-r1:14b` for reasoning/coaching; swap via `MODEL_NAME`. OpenAI's GPT models / HuggingFace Transformers remain an optional cloud fallback.
   
 ### 5. **Development Environment Setup Using Docker**
 Create a Docker environment to isolate development processes, enhance portability and facilitate collaboration (if needed). Consider setting up the following docker file:

@@ -25,7 +25,7 @@ digraph SystemArchitecture {
 
     subgraph cluster_aiml {
         label="AI/ML Layer"; style="filled"; color="#FFF3E0";
-        LM       [label="Language Model\nGPT-4 / BERT", fillcolor="#4CAF50", fontcolor="white"];
+        LM       [label="LLM Runtime\nOllama 0.22.1\ndeepseek-r1:14b", fillcolor="#4CAF50", fontcolor="white"];
         RAG      [label="RAG System", fillcolor="#2196F3", fontcolor="white"];
         NLP      [label="NLP Processing"];
         Biometric[label="Biometric Auth"];
@@ -33,7 +33,7 @@ digraph SystemArchitecture {
 
     subgraph cluster_data {
         label="Data Layer"; style="filled"; color="#E3F2FD";
-        VectorDB     [label="Vector Database\nFAISS / Pinecone", shape=cylinder];
+        VectorDB     [label="Vector Database\nFAISS", shape=cylinder];
         KnowledgeBase[label="Knowledge Base", shape=cylinder];
         UserData     [label="User Data (Encrypted)", shape=cylinder];
         Models       [label="Model Storage", shape=cylinder];

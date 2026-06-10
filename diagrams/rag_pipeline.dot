@@ -36,7 +36,7 @@ digraph RAGPipeline {
 
     subgraph cluster_gen {
         label="Generation Phase"; style="filled"; color="#FFF3E0";
-        LM         [label="Language Model\nGPT-4 / BERT", fillcolor="#4CAF50", fontcolor="white"];
+        LM         [label="LLM Runtime\nOllama 0.22.1\ndeepseek-r1:14b", fillcolor="#4CAF50", fontcolor="white"];
         Response   [label="Generated Response"];
         PostProcess[label="Post-Processing"];
         Validation [label="Response Validation"];

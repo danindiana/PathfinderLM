@@ -1,8 +1,16 @@
-# Core ML/AI Dependencies
-torch>=2.0.0
-transformers>=4.30.0
-sentence-transformers>=2.2.2
-faiss-cpu>=1.7.4
+# Core AI/Retrieval Dependencies (local-first)
+# Generation + embeddings run on the Ollama 0.22.1 runtime via its HTTP API,
+# so no torch/transformers are required for the default path.
+ollama>=0.3.0          # Python client for the Ollama runtime
+faiss-cpu>=1.7.4       # Vector similarity search
+
+# --- Optional: cloud / HuggingFace fallback ---
+# Uncomment these only if you set LLM_PROVIDER=openai or run embeddings locally
+# with sentence-transformers instead of Ollama.
+# torch>=2.0.0
+# transformers>=4.30.0
+# sentence-transformers>=2.2.2
+# openai>=1.0.0
 
 # Web Framework
 flask>=2.3.0
