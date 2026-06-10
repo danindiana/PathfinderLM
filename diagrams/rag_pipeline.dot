@@ -1,0 +1,64 @@
+// PathfinderLM — RAG Pipeline
+// Render: dot -Tpng rag_pipeline.dot -o rag_pipeline.png
+//         dot -Tsvg rag_pipeline.dot -o rag_pipeline.svg
+digraph RAGPipeline {
+    rankdir=LR;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — RAG Pipeline";
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica"];
+
+    subgraph cluster_input {
+        label="Input Processing"; style="filled"; color="#ECEFF1";
+        UserQuery[label="User Query"];
+        Tokenize [label="Tokenization"];
+        Embed    [label="Query Embedding"];
+        UserQuery -> Tokenize -> Embed;
+    }
+
+    subgraph cluster_retrieval {
+        label="Retrieval Phase"; style="filled"; color="#E3F2FD";
+        VectorSearch [label="Vector Similarity Search"];
+        FAISS        [label="FAISS Index", shape=cylinder];
+        TopK         [label="Top-K Documents"];
+        KnowledgeBase[label="Knowledge Base\nArticles, Advice, Research", shape=cylinder];
+        VectorSearch -> FAISS -> TopK;
+        KnowledgeBase -> FAISS;
+    }
+
+    subgraph cluster_aug {
+        label="Augmentation Phase"; style="filled"; color="#F3E5F5";
+        ContextBuild[label="Context Building"];
+        AugPrompt   [label="Augmented Prompt"];
+        ContextBuild -> AugPrompt;
+    }
+
+    subgraph cluster_gen {
+        label="Generation Phase"; style="filled"; color="#FFF3E0";
+        LM         [label="Language Model\nGPT-4 / BERT", fillcolor="#4CAF50", fontcolor="white"];
+        Response   [label="Generated Response"];
+        PostProcess[label="Post-Processing"];
+        Validation [label="Response Validation"];
+        LM -> Response -> PostProcess -> Validation;
+    }
+
+    subgraph cluster_feedback {
+        label="Feedback Loop"; style="filled"; color="#E8F5E9";
+        UserFeedback  [label="User Feedback", shape=diamond, fillcolor="#C8E6C9"];
+        UpdateRewards [label="Update Model Rewards"];
+        RefinementQueue[label="Refinement Queue"];
+    }
+
+    FinalResponse[label="Final Response to User", fillcolor="#BBDEFB"];
+
+    Embed -> VectorSearch;
+    TopK -> ContextBuild;
+    UserQuery -> ContextBuild;
+    AugPrompt -> LM;
+    Validation -> UserFeedback;
+    UserFeedback -> UpdateRewards [label="Positive"];
+    UserFeedback -> RefinementQueue [label="Negative"];
+    RefinementQueue -> ContextBuild;
+    Validation -> FinalResponse;
+}

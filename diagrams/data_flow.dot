@@ -1,0 +1,42 @@
+// PathfinderLM — Data Flow (request lifecycle)
+// Original was a Mermaid sequence diagram; rendered here as a directed flow.
+// Render: dot -Tpng data_flow.dot -o data_flow.png
+//         dot -Tsvg data_flow.dot -o data_flow.svg
+digraph DataFlow {
+    rankdir=TB;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — Request / Data Flow";
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica"];
+
+    U   [label="User", shape=ellipse, fillcolor="#CFD8DC"];
+    UI  [label="User Interface"];
+    Auth[label="Authentication"];
+    Sec [label="Security Layer\n(Biometric / Voice)", fillcolor="#FFE0B2"];
+    App [label="Flask Application"];
+    RAG [label="RAG System", fillcolor="#2196F3", fontcolor="white"];
+    DB  [label="Vector Database", shape=cylinder];
+    KB  [label="Knowledge Base", shape=cylinder];
+    LM  [label="Language Model", fillcolor="#4CAF50", fontcolor="white"];
+    Deny[label="Access Denied", fillcolor="#FFCDD2"];
+
+    U  -> UI   [label="1. Submit query / goal"];
+    UI -> Auth [label="2. Authenticate"];
+    Auth -> Sec[label="3. Verify identity"];
+    Sec -> Auth[label="4. Auth result", style=dashed];
+    Auth -> Deny [label="on failure", color="#C62828"];
+    Auth -> App [label="5. Forward (on success)"];
+    App -> RAG [label="6. Process query"];
+    RAG -> DB  [label="7a. Retrieve embeddings"];
+    RAG -> KB  [label="7b. Fetch documents"];
+    DB -> RAG  [label="Top-K vectors", style=dashed];
+    KB -> RAG  [label="Related context", style=dashed];
+    RAG -> LM  [label="8. Generate w/ context"];
+    LM -> RAG  [label="9. Response", style=dashed];
+    RAG -> Sec [label="10. Validate + encrypt"];
+    Sec -> App [label="11. Secured response", style=dashed];
+    App -> UI  [label="12. Deliver"];
+    UI -> U    [label="13. Display guidance", style=dashed];
+    U  -> App  [label="14. Feedback -> update profile", color="#1565C0"];
+}

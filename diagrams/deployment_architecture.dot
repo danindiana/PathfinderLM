@@ -1,0 +1,68 @@
+// PathfinderLM — Deployment Architecture
+// Render: dot -Tpng deployment_architecture.dot -o deployment_architecture.png
+//         dot -Tsvg deployment_architecture.dot -o deployment_architecture.svg
+digraph DeploymentArchitecture {
+    rankdir=TB;
+    fontname="Helvetica";
+    labelloc="t";
+    label="PathfinderLM — Deployment Architecture (Ubuntu 22.04 Bare-Metal)";
+    node [shape=box, style="rounded,filled", fontname="Helvetica", fillcolor="#FFFFFF"];
+    edge [fontname="Helvetica"];
+
+    Internet[label="Internet", shape=ellipse, fillcolor="#CFD8DC"];
+    Admin   [label="System Admin", shape=ellipse, fillcolor="#CFD8DC"];
+
+    subgraph cluster_server {
+        label="Ubuntu 22.04 Bare-Metal Server"; style="filled"; color="#ECEFF1";
+
+        subgraph cluster_docker {
+            label="Docker Environment"; style="filled"; color="#E0F2F1";
+
+            subgraph cluster_appc {
+                label="Application Container"; style="filled"; color="#E8F5E9";
+                Flask [label="Flask App\nPort 5000"];
+                Routes[label="Route Handlers"];
+                Models[label="Model Loaders"];
+            }
+            subgraph cluster_dbc {
+                label="Database Container"; style="filled"; color="#E3F2FD";
+                VectorDB[label="FAISS Vector Store", shape=cylinder];
+                UserDB  [label="User Data (PostgreSQL)", shape=cylinder];
+            }
+            subgraph cluster_aimlc {
+                label="AI/ML Container"; style="filled"; color="#FFF3E0";
+                GPU         [label="GPU Support (CUDA)"];
+                PyTorch     [label="PyTorch Runtime"];
+                Transformers[label="HuggingFace Transformers"];
+            }
+            subgraph cluster_monc {
+                label="Monitoring Container"; style="filled"; color="#F3E5F5";
+                Prometheus[label="Prometheus Metrics"];
+                Grafana   [label="Grafana Dashboards"];
+            }
+        }
+
+        subgraph cluster_sys {
+            label="System Layer"; style="filled"; color="#FFFDE7";
+            Docker  [label="Docker Engine"];
+            Nginx   [label="Nginx Reverse Proxy"];
+            Firewall[label="UFW Firewall"];
+            SSH     [label="SSH Server"];
+        }
+
+        subgraph cluster_hw {
+            label="Hardware"; style="filled"; color="#CFD8DC";
+            CPU    [label="AMD Ryzen 9 5950X\n16-Core"];
+            GPUHard[label="NVIDIA RTX 3060"];
+            RAM    [label="128GB RAM"];
+            Storage[label="1TB NVMe SSD"];
+        }
+    }
+
+    Internet -> Firewall -> Nginx -> Flask;
+    Flask -> VectorDB; Flask -> UserDB; Flask -> PyTorch;
+    PyTorch -> GPU; Transformers -> GPU;
+    Flask -> Prometheus -> Grafana;
+    Docker -> CPU; Docker -> GPUHard; Docker -> RAM; Docker -> Storage;
+    Admin -> SSH -> Docker;
+}
