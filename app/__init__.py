@@ -15,8 +15,10 @@ _API_INFO = {
     "name": "PathfinderLM",
     "description": "Local-first RAG life-coach API (Ollama + OpenClaw).",
     "endpoints": {
+        "GET /console": "Human operator dashboard (live status + ask box).",
         "GET /health": "Liveness/readiness with subsystem status.",
         "POST /ask": "Ask a coaching question. Body: {\"question\": str, \"context\"?: str}.",
+        "GET /api/activity": "Recent request activity + running stats (JSON).",
         "GET /metrics": "Prometheus metrics.",
     },
 }

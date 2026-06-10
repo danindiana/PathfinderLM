@@ -46,3 +46,19 @@ def test_index_page(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.get_json()["name"] == "PathfinderLM"
+
+
+def test_console_page(client):
+    response = client.get("/console")
+    assert response.status_code == 200
+    assert "text/html" in response.content_type
+    assert b"Operator Console" in response.data
+
+
+def test_activity_feed_records_requests(client):
+    before = client.get("/api/activity").get_json()["stats"]["total"]
+    client.post("/ask", json={"question": "How do I focus better?"})
+    after = client.get("/api/activity").get_json()
+    assert after["stats"]["total"] == before + 1
+    assert after["recent"][0]["status"] == 200
+    assert "focus" in after["recent"][0]["question"]
