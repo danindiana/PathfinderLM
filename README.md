@@ -4,9 +4,38 @@
 
 **Personalized Life Coach System Leveraging Language Models and Retrieval Augmented Generation (RAG)**
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%20LTS-orange.svg)](https://ubuntu.com/)
+<!-- Status & quality -->
+[![CI Pipeline](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml/badge.svg)](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml)
+[![CD Pipeline](https://github.com/danindiana/PathfinderLM/actions/workflows/cd.yml/badge.svg)](https://github.com/danindiana/PathfinderLM/actions/workflows/cd.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/danindiana/PathfinderLM/graphs/commit-activity)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://www.conventionalcommits.org)
+
+<!-- Language & runtime -->
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![HuggingFace Transformers](https://img.shields.io/badge/%F0%9F%A4%97%20Transformers-4.30%2B-FFD21E.svg)](https://huggingface.co/transformers/)
+[![FAISS](https://img.shields.io/badge/FAISS-vector%20search-005571.svg)](https://github.com/facebookresearch/faiss)
+[![Flask](https://img.shields.io/badge/Flask-2.3%2B-000000.svg?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+
+<!-- Infra & tooling -->
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%20LTS-E95420.svg?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/imports-isort-1674b1.svg)](https://pycqa.github.io/isort/)
+[![Security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![Code of Conduct](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
+> ⚠️ **Project status: pre-alpha / active development.** The architecture and
+> features described below represent the *target* system. See the
+> [Roadmap](#roadmap) and [STRUCTURE_IMPROVEMENTS.md](STRUCTURE_IMPROVEMENTS.md)
+> for what is implemented today versus planned.
+
+> 🩺 **Clinical disclaimer:** PathfinderLM is a self-improvement and educational
+> tool. It is **not** a medical device and does **not** provide medical,
+> psychological, or addiction-treatment advice. In a crisis, contact a licensed
+> professional or your local emergency services.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -20,8 +49,14 @@
 - [Key Features](#key-features)
 - [Technology Stack](#technology-stack)
 - [Quick Start](#quick-start)
+- [Configuration](#configuration)
+- [Make Targets](#make-targets)
 - [Documentation](#documentation)
+- [Project Status](#project-status)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
+- [Security Policy](#security-policy)
+- [FAQ](#faq)
 - [License](#license)
 
 ## Overview
@@ -533,6 +568,53 @@ pip3 install -r requirements.txt
 python3 app/main.py
 ```
 
+## Configuration
+
+PathfinderLM is configured through environment variables (loaded from a `.env`
+file via `python-dotenv`) and YAML files under `configs/`. Copy the example and
+edit to taste:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FLASK_ENV` | `production` | `development` enables debug + autoreload |
+| `FLASK_PORT` | `5000` | Port the Flask app binds to |
+| `MODEL_NAME` | `bert-base-uncased` | HuggingFace model id used for generation/embeddings |
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Encoder for the FAISS index |
+| `FAISS_INDEX_PATH` | `results/faiss.index` | On-disk location of the vector index |
+| `KNOWLEDGE_BASE_DIR` | `data/processed` | Source documents ingested into the index |
+| `TOP_K` | `5` | Number of documents retrieved per query |
+| `DEVICE` | `auto` | `cpu`, `cuda`, or `auto` (detects GPU) |
+| `LOG_LEVEL` | `INFO` | Python logging level |
+| `SECRET_KEY` | _(unset)_ | Flask session signing key — **set in production** |
+
+> **Never commit `.env`.** It is already listed in [`.gitignore`](.gitignore).
+> Use a secrets manager (Docker secrets, Vault, or systemd `EnvironmentFile`)
+> for production deployments.
+
+## Make Targets
+
+The project ships a [`Makefile`](Makefile) that wraps the most common workflows.
+Run `make help` for the full list:
+
+| Target | Description |
+|--------|-------------|
+| `make install` | Install production dependencies |
+| `make install-dev` | Install dev/test/lint tooling |
+| `make test` | Run the unit-test suite (`pytest`) |
+| `make lint` | Run flake8 + pylint + mypy |
+| `make format` | Auto-format with black + isort |
+| `make security` | Run bandit + safety scans |
+| `make docker-build` | Build the container image |
+| `make docker-run` | Run the app in a container |
+| `make smoke-test` | Execute the post-deploy smoke tests |
+| `make deploy` | Deploy via `scripts/deploy.sh` |
+| `make clean` | Remove build artifacts and caches |
+| `make all` | `clean` → `lint` → `test` → `security` → `build` |
+
 ## Documentation
 
 Detailed documentation is available in the [`docs/`](docs/) directory:
@@ -583,16 +665,78 @@ python3 scripts/train_model.py
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
 
+## Project Status
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Documentation & architecture | ✅ Established | README, mission, security framework, diagrams |
+| CI/CD pipeline | ✅ Established | GitHub Actions (lint, test, security, build, deploy) |
+| Build automation | ✅ Established | `Makefile` + bare-metal scripts |
+| Core RAG pipeline | 🚧 In progress | Retrieval + generation glue code |
+| Web / mobile UI | 📋 Planned | See [Roadmap](#roadmap) |
+| Voice biometric auth | 📋 Planned | Information-assurance design complete |
+| Wearable integration | 📋 Planned | Holistic health tracking |
+
+Legend: ✅ done · 🚧 in progress · 📋 planned. The authoritative implementation
+checklist lives in [STRUCTURE_IMPROVEMENTS.md](STRUCTURE_IMPROVEMENTS.md).
+
 ## Contributing
 
-We welcome contributions! Please see our [STRUCTURE_IMPROVEMENTS.md](STRUCTURE_IMPROVEMENTS.md) for areas that need development.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our
+[Code of Conduct](CODE_OF_CONDUCT.md) before opening a PR. The
+[STRUCTURE_IMPROVEMENTS.md](STRUCTURE_IMPROVEMENTS.md) file lists areas that
+currently need development.
 
 ### Development Process
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Install dev tooling (`make install-dev`)
+4. Make your changes; keep the suite green (`make lint test security`)
+5. Commit using [Conventional Commits](https://www.conventionalcommits.org)
+   (`git commit -m 'feat: add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request against `main`
+
+## Security Policy
+
+Found a vulnerability? **Please do not open a public issue.** Follow the
+responsible-disclosure process documented in [SECURITY.md](SECURITY.md). We aim
+to acknowledge reports within 72 hours.
+
+## FAQ
+
+<details>
+<summary><strong>Does PathfinderLM call out to a cloud LLM API?</strong></summary>
+
+The reference design runs models locally on a bare-metal Ubuntu host for privacy
+and control. The model layer is pluggable — you can swap in a hosted API by
+changing `MODEL_NAME` and the model loader, but the default posture is
+local-first / no-data-egress.
+</details>
+
+<details>
+<summary><strong>Can I run it without a GPU?</strong></summary>
+
+Yes. Set `DEVICE=cpu` and use `faiss-cpu` (the default in `requirements.txt`).
+Generation will be slower with large models; prefer a smaller model for CPU-only
+hosts.
+</details>
+
+<details>
+<summary><strong>Is this a replacement for therapy or medical treatment?</strong></summary>
+
+No. See the clinical disclaimer at the top of this README. PathfinderLM is an
+educational/self-improvement aid and is not a substitute for licensed
+professional care.
+</details>
+
+<details>
+<summary><strong>Where do I report bugs vs. ask questions?</strong></summary>
+
+Bugs and feature requests → [GitHub Issues](https://github.com/danindiana/PathfinderLM/issues).
+Open-ended questions and ideas → [GitHub Discussions](https://github.com/danindiana/PathfinderLM/discussions).
+Security issues → [SECURITY.md](SECURITY.md).
+</details>
 
 ## Ethical Considerations
 
