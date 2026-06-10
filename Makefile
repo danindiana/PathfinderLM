@@ -1,4 +1,4 @@
-.PHONY: help install install-dev clean test lint format security docker-build docker-run deploy smoke-test diagrams all
+.PHONY: help install install-dev clean test lint format security docker-build docker-run deploy smoke-test diagrams model all
 
 # Configuration
 PYTHON := python3
@@ -49,6 +49,7 @@ help:
 	@echo "  $(YELLOW)deploy-staging$(NC)   - Deploy to staging environment"
 	@echo "  $(YELLOW)deploy-production$(NC) - Deploy to production environment"
 	@echo "  $(YELLOW)diagrams$(NC)         - Render Graphviz diagrams to PNG + SVG"
+	@echo "  $(YELLOW)model$(NC)            - Build the pathfinder-coach Ollama model from Modelfile"
 	@echo "  $(YELLOW)all$(NC)              - Run install, lint, test, and build"
 	@echo ""
 
@@ -75,6 +76,12 @@ diagrams:
 	@command -v dot >/dev/null || { echo "$(RED)error: graphviz 'dot' not found (sudo apt install graphviz)$(NC)"; exit 1; }
 	@cd diagrams && ./render.sh
 	@echo "$(GREEN)✓ Diagrams rendered$(NC)"
+
+model:
+	@echo "$(BLUE)Building pathfinder-coach model from Modelfile...$(NC)"
+	@command -v ollama >/dev/null || { echo "$(RED)error: 'ollama' not found (https://ollama.com/download)$(NC)"; exit 1; }
+	ollama create pathfinder-coach -f Modelfile
+	@echo "$(GREEN)✓ Model ready. Set MODEL_NAME=pathfinder-coach to use it.$(NC)"
 
 clean:
 	@echo "$(BLUE)Cleaning build artifacts...$(NC)"

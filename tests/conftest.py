@@ -13,10 +13,14 @@ import pytest
 class FakeClient:
     """Stand-in for ``ollama.Client`` returning deterministic canned data."""
 
+    # Records the kwargs of the most recent generate() call for assertions.
+    last_generate_kwargs: dict = {}
+
     def __init__(self, *args, **kwargs):
         pass
 
     def generate(self, model=None, prompt=None, **kwargs):
+        FakeClient.last_generate_kwargs = {"model": model, "prompt": prompt, **kwargs}
         return {"response": "<think>reasoning</think>This is a coached answer."}
 
     def embeddings(self, model=None, prompt=None, **kwargs):

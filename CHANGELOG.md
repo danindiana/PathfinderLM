@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Coaching persona via Ollama system role + `Modelfile`.** New repo-root
+  `Modelfile` (`pathfinder-coach`) and `make model` target; the persona is applied
+  through the model's system role (configurable via `SYSTEM_PROMPT`) instead of
+  being concatenated into the prompt.
+- **Full `docs/` set**: `api_documentation.md` (live endpoint reference),
+  `architecture.md`, `setup_guide.md`, `user_manual.md`, and
+  `openclaw_integration.md`.
+- **OpenClaw example integration** under `integrations/openclaw/`: a `/ask`
+  wrapper (`ask_pathfinder.sh`), an example skill manifest (`skill.json`), and a
+  README.
+- **Codecov coverage badge** and a Tests badge in the README; the CI test job now
+  fails on real test failures (removed the failure-swallowing fallback).
+
+### Added (app stack)
 - **Implemented the application code stack** (previously docs-only). New `app/`
   Flask package with an application factory, `POST /ask` (full RAG: Ollama
   embeddings → FAISS Top-K retrieval → context-augmented generation), `GET
