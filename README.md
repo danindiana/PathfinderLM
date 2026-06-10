@@ -8,6 +8,8 @@
 [![CI Pipeline](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml/badge.svg)](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml)
 [![CD Pipeline](https://github.com/danindiana/PathfinderLM/actions/workflows/cd.yml/badge.svg)](https://github.com/danindiana/PathfinderLM/actions/workflows/cd.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Tests](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/danindiana/PathfinderLM/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/danindiana/PathfinderLM/branch/main/graph/badge.svg)](https://codecov.io/gh/danindiana/PathfinderLM)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/danindiana/PathfinderLM/graphs/commit-activity)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://www.conventionalcommits.org)
@@ -499,7 +501,7 @@ graph TD
 ### AI/ML (local-first)
 - **LLM Runtime**: [Ollama](https://ollama.com/) **0.22.1** (local, containerized)
 - **Default Model**: `deepseek-r1:14b`
-- **Agent Layer**: [OpenClaw](https://openclaw.ai/) — local-first, multi-model personal-AI assistant
+- **Agent Layer**: [OpenClaw](https://openclaw.ai/) — local-first, multi-model personal-AI assistant ([integration guide](docs/openclaw_integration.md))
 - **Embeddings**: Ollama (`nomic-embed-text`)
 - **Vector Search**: FAISS
 - **NLP**: spaCy, NLTK
@@ -584,9 +586,19 @@ sudo apt install python3 python3-pip -y
 # Install Python packages
 pip3 install -r requirements.txt
 
+# (Optional) bake the coaching persona into a named model
+make model            # ollama create pathfinder-coach -f Modelfile
+# export MODEL_NAME=pathfinder-coach
+
+# Build the retrieval index from the seed corpus
+python3 scripts/build_index.py
+
 # Run the application
 python3 app/main.py
 ```
+
+See the [Setup Guide](docs/setup_guide.md) for the full walkthrough and the
+[API Documentation](docs/api_documentation.md) for endpoint details.
 
 ## Configuration
 
@@ -607,6 +619,7 @@ cp .env.example .env
 | `MODEL_NAME` | `deepseek-r1:14b` | Ollama model used for generation/reasoning |
 | `EMBEDDING_MODEL` | `nomic-embed-text` | Ollama embedding model for the FAISS index |
 | `OPENAI_API_KEY` | _(unset)_ | Required only when `LLM_PROVIDER=openai` |
+| `SYSTEM_PROMPT` | _(coaching persona)_ | Overrides the system-role persona text |
 | `FAISS_INDEX_PATH` | `results/faiss.index` | On-disk location of the vector index |
 | `KNOWLEDGE_BASE_DIR` | `data/processed` | Source documents ingested into the index |
 | `TOP_K` | `5` | Number of documents retrieved per query |
@@ -642,6 +655,11 @@ Run `make help` for the full list:
 
 Detailed documentation is available in the [`docs/`](docs/) directory:
 
+- **[API Documentation](docs/api_documentation.md)**: Endpoint reference (`/ask`, `/health`, `/metrics`)
+- **[Architecture](docs/architecture.md)**: Components and request flow
+- **[Setup Guide](docs/setup_guide.md)**: Local, Docker, and bare-metal installation
+- **[User Manual](docs/user_manual.md)**: End-user guide
+- **[OpenClaw Integration](docs/openclaw_integration.md)**: Drive PathfinderLM from the OpenClaw agent
 - **[Mission & Vision](mission.md)**: Project goals and philosophy
 - **[Software Stack](ground_game.md)**: Complete technical stack details
 - **[Directory Structure](tree.md)**: Detailed project structure

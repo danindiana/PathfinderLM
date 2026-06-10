@@ -33,6 +33,15 @@ def test_ask_requires_question(client):
     assert "error" in response.get_json()
 
 
+def test_ask_forwards_system_prompt(client):
+    from tests.conftest import FakeClient
+
+    resp = client.post("/ask", json={"question": "How do I start a new habit?"})
+    assert resp.status_code == 200
+    captured = FakeClient.last_generate_kwargs
+    assert "life coach" in captured.get("system", "")
+
+
 def test_index_page(client):
     response = client.get("/")
     assert response.status_code == 200

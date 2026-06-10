@@ -35,6 +35,18 @@ def _yaml_defaults() -> Dict[str, Any]:
 
 _DEFAULTS = _yaml_defaults()
 
+# Default coaching persona, applied via Ollama's ``system`` role. Mirrors the
+# SYSTEM block in the repo-root Modelfile; override with the SYSTEM_PROMPT env var
+# or by building and selecting the ``pathfinder-coach`` model.
+DEFAULT_SYSTEM_PROMPT = (
+    "You are PathfinderLM, an empathetic, evidence-based life coach. "
+    "Help the user set goals and take small, achievable next steps. Be warm, "
+    "concise, and practical. Ground your advice in the provided context when it "
+    "is relevant. You are not a medical or mental-health professional: for crises "
+    "or clinical concerns, encourage the user to contact a licensed professional "
+    "or emergency services."
+)
+
 
 def _get(name: str, fallback: str) -> str:
     """Env var > config.yaml > hard-coded fallback."""
@@ -61,6 +73,8 @@ class Config:
 
     device: str = field(default_factory=lambda: _get("DEVICE", "auto"))
     log_level: str = field(default_factory=lambda: _get("LOG_LEVEL", "INFO"))
+
+    system_prompt: str = field(default_factory=lambda: _get("SYSTEM_PROMPT", DEFAULT_SYSTEM_PROMPT))
 
     @property
     def debug(self) -> bool:

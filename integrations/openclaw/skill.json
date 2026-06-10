@@ -1,0 +1,29 @@
+{
+  "name": "pathfinder_coach",
+  "version": "0.1.0",
+  "description": "Ask PathfinderLM, a local-first RAG life coach, for warm, practical, evidence-based guidance on goals, habits, productivity, and stress. Grounded in a local knowledge base via Ollama + FAISS.",
+  "type": "shell",
+  "command": "./ask_pathfinder.sh",
+  "args": [
+    {
+      "name": "question",
+      "type": "string",
+      "required": true,
+      "description": "The coaching question to ask."
+    },
+    {
+      "name": "context",
+      "type": "string",
+      "required": false,
+      "description": "Optional personal context to tailor the answer."
+    }
+  ],
+  "env": {
+    "PATHFINDER_URL": "http://localhost:5000"
+  },
+  "examples": [
+    "use the pathfinder coach to help me plan my week",
+    "ask pathfinder how to stop procrastinating on my thesis"
+  ],
+  "note": "Example OpenClaw skill manifest. Adapt the field names to your OpenClaw version's skill schema; see docs.openclaw.ai."
+}

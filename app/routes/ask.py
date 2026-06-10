@@ -17,8 +17,9 @@ logger = logging.getLogger("pathfinderlm.ask")
 # Built once per process; degrades gracefully if no index exists yet.
 _retriever = Retriever()
 
+# The coaching persona is applied via the system role (see app.config /
+# Modelfile); this template carries only the retrieved context and the question.
 _PROMPT_TEMPLATE = (
-    "You are PathfinderLM, an empathetic, evidence-based life coach.\n"
     "Use the following context when it is relevant.\n\n"
     "Context:\n{context}\n\n"
     "Question: {question}\n\n"
@@ -55,7 +56,7 @@ def ask():
     prompt = _build_prompt(question, user_context, retrieved)
 
     try:
-        answer = llm.generate(prompt)
+        answer = llm.generate(prompt, system=config.system_prompt)
     except NotImplementedError as exc:
         return jsonify({"error": str(exc)}), 501
     except Exception as exc:
