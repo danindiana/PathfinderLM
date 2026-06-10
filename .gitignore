@@ -68,6 +68,7 @@ data/processed/*
 data/datasets/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/seed_life_coaching.md
 !data/datasets/.gitkeep
 
 # Models
