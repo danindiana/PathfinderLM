@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Operator console.** A self-contained HTML dashboard at `/console` (live status,
+  throughput, recent-requests table, in-browser ask box) backed by a new
+  `/api/activity` JSON feed and an in-memory ring buffer (`app/activity.py`); `/ask`
+  now records each request's status, latency, and retrieved-source count.
 - **Coaching persona via Ollama system role + `Modelfile`.** New repo-root
   `Modelfile` (`pathfinder-coach`) and `make model` target; the persona is applied
   through the model's system role (configurable via `SYSTEM_PROMPT`) instead of
@@ -20,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   README.
 - **Codecov coverage badge** and a Tests badge in the README; the CI test job now
   fails on real test failures (removed the failure-swallowing fallback).
+
+### Fixed
+- CI **Docker Build & Scan** failed uploading the Trivy SARIF report
+  (`Resource not accessible by integration`). Granted the job
+  `security-events: write` and made the upload `continue-on-error`, so the pipeline
+  is green and stays green if code scanning is disabled.
 
 ### Added (app stack)
 - **Implemented the application code stack** (previously docs-only). New `app/`
