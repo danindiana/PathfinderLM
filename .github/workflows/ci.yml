@@ -167,7 +167,6 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_NAME }}:test
           format: 'table'
-          exit-code: '0'
 
       - name: Run container structure test
         if: always()
