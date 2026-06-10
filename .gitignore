@@ -75,6 +75,10 @@ results/model/*
 !results/model/.gitkeep
 *.pth
 *.bin
+
+# Built artifacts (FAISS index + document sidecar)
+results/*.index
+results/*.index.docs.json
 *.onnx
 *.pkl
 *.joblib

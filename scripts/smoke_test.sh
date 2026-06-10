@@ -147,9 +147,8 @@ test_python_imports() {
     local import_test=$(python3 -c "
 try:
     import flask
-    import transformers
-    import torch
-    import sentence_transformers
+    import ollama
+    import faiss
     print('SUCCESS')
 except ImportError as e:
     print(f'FAILED: {e}')

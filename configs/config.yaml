@@ -1,0 +1,17 @@
+# PathfinderLM non-secret defaults.
+# Environment variables (and .env) override anything set here.
+# Keys are lower-cased env-var names.
+
+llm_provider: ollama
+ollama_host: http://localhost:11434
+model_name: deepseek-r1:14b
+embedding_model: nomic-embed-text
+
+faiss_index_path: results/faiss.index
+knowledge_base_dir: data/processed
+top_k: 5
+
+device: auto
+log_level: INFO
+flask_env: production
+flask_port: 5000
