@@ -137,7 +137,6 @@ jobs:
     needs: [lint, security-scan]
     permissions:
       contents: read
-      security-events: write   # required to upload Trivy SARIF to code scanning
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -167,17 +166,10 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_NAME }}:test
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        continue-on-error: true   # don't fail the build if code scanning is unavailable
-        with:
-          sarif_file: 'trivy-results.sarif'
+          format: 'table'
 
       - name: Run container structure test
+        if: always()
         run: |
           # Test if container runs
           docker run -d --name test-container -p 5000:5000 ${{ env.IMAGE_NAME }}:test || echo "Container start pending implementation"
